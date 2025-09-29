@@ -24,6 +24,9 @@ def create_app() -> Flask:
     # Extensions
     db.init_app(app)
     jwt.init_app(app)
+    
+    # JWT Configuration
+    jwt.token_in_blocklist_loader(_check_if_token_revoked)
 
     # CORS
     allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
@@ -37,10 +40,18 @@ def create_app() -> Flask:
         from .models.user import User
         from .models.mail import Mail
         from .models.vault import VaultItem
+        from .models.token_blacklist import TokenBlacklist
         db.create_all()
         _ensure_admin_user()
 
     return app
+
+
+def _check_if_token_revoked(jwt_header, jwt_payload):
+    """Check if token is in blacklist"""
+    from .models.token_blacklist import TokenBlacklist
+    jti = jwt_payload['jti']
+    return TokenBlacklist.is_token_revoked(jti)
 
 
 def _ensure_admin_user() -> None:
