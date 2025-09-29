@@ -1,4 +1,4 @@
-# IntraMail Backend (Flask)
+# Sentinel Backend (Flask)
 
 Local-only internal mail + credential vault.
 
